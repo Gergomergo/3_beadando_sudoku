@@ -1,0 +1,5 @@
+/Users/gelegonyagergo/Desktop/sudoku projekt/CMakeFiles/graphics.dir
+/Users/gelegonyagergo/Desktop/sudoku projekt/CMakeFiles/test_graphics.dir
+/Users/gelegonyagergo/Desktop/sudoku projekt/CMakeFiles/helloworld.dir
+/Users/gelegonyagergo/Desktop/sudoku projekt/CMakeFiles/edit_cache.dir
+/Users/gelegonyagergo/Desktop/sudoku projekt/CMakeFiles/rebuild_cache.dir

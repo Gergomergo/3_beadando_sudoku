@@ -1,0 +1,255 @@
+#include "graphics.hpp"
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <random>
+
+using namespace genv;
+using namespace std;
+
+const int XX = 800;
+const int YY = 600;
+int utox = XX / 2 - 130;
+bool start = false;
+
+struct negyzet {
+    int x;
+    int y;
+    signed char r, g, b;
+    bool letezik;
+};
+
+vector<negyzet> negyzetek(50);
+struct labda
+{
+    int x;
+    int y;
+    double deg;
+};
+
+void menu()
+{
+    gout << move_to(XX/2 - 200, YY/2 - 50) << color(255,255,255) << text("Nyomd meg a space-t a starthoz!");
+}
+
+void torol(int honnanx, int honnany, int hovax, int hovay)
+{
+    gout << move_to(honnanx, honnany);
+    gout << color(80, 80, 80);
+    gout << box_to(hovax, hovay);
+    gout << color(255, 255, 255);//gout << refresh;
+}
+
+void lasztitorol(labda laszti)
+{
+    gout << color(80, 80, 80);
+    for (int i = laszti.x; i < laszti.x + 30; ++i)
+    {
+        for (int j = laszti.y; j < laszti.y + 30; ++j)
+        {
+            if (round(pow(i-laszti.x-15, 2) + pow(j-laszti.y-15, 2)) < 200)
+            {
+                gout << move_to(i, j) << box(8,8);
+            }
+        }
+    }
+}
+
+void uto (int& utox, bool rl, bool mozog)
+{
+    torol(utox, 560, utox + 130, 580);
+    gout << color(175, 255, 248);
+
+    if (rl == true && utox <= XX - 150 && mozog == true)
+    {
+        utox += 10;
+        gout << move_to(utox, 560);
+        gout << box_to(utox + 130, 580);
+    }
+    else {
+        gout << move_to(utox, 560);
+        gout << box_to(utox + 120, 580);
+    }
+    if (rl == false && 20 <= utox && mozog == true)
+    {
+        utox -= 10;
+        gout << move_to(utox, 560);
+        gout << box_to(utox + 130, 580); /////////
+    }
+    else {
+        gout << move_to(utox, 560);
+        gout << box_to(utox + 130, 580);
+    }
+    if (mozog == false)
+    {
+        gout << move_to(utox, 560);
+        gout << box_to(utox + 130, 580);
+    }
+}
+
+void negyzetrajzol(vector<negyzet> negyzetek)
+{
+    for (int i = 0; i < negyzetek.size(); ++i)
+    {
+        if (negyzetek[i].letezik == true)
+        {
+            gout << move_to(negyzetek[i].x, negyzetek[i].y);
+            gout << color(negyzetek[i].r, negyzetek[i].g, negyzetek[i].b);
+            gout << box_to(negyzetek[i].x + 30, negyzetek[i].y + 30);
+        }
+    }
+}
+
+void inditas()
+{
+    torol(0,0,XX - 1,YY - 1);
+    gout << color (175, 255, 248);
+    gout << move_to(utox, 560);
+    gout << box_to(utox + 130, 580);
+    negyzet feltolt;
+    for (int i = 0; i < negyzetek.size(); ++i)
+    {
+        feltolt.x = rand() % (XX - 32);
+        feltolt.y = rand() % (YY / 2 + 2);
+
+
+        for (int j = 0; j < i; ++j)
+        {
+            if (abs(feltolt.x - negyzetek[j].x) < 33 && abs(feltolt.y - negyzetek[j].y) < 33)
+            {
+                feltolt.x = rand()%(XX - 32);
+                feltolt.y = rand()%(YY/2 + 2);
+
+                j = 0;
+            }
+        }
+        feltolt.r = rand() % 255;
+        feltolt.g = rand() % 255;
+        feltolt.b = rand() % 255;
+        feltolt.letezik = true;
+        negyzetek[i] = feltolt;
+    }
+    negyzetrajzol(negyzetek);
+    menu();
+    gout << refresh;
+}
+
+void szog(labda& laszti, vector<negyzet>& negyzetek)
+{
+    if (laszti.y < 20)
+    {
+        laszti.deg = (360 - laszti.deg);
+    }
+    if (laszti.y + 33 > 550 && abs(laszti.x-utox) <= 130)
+    {
+        laszti.deg = (360 - laszti.deg);
+    }
+    if (laszti.x > XX - 45 || laszti.x < 5)
+    {
+        laszti.deg = (180 - laszti.deg);
+    }
+    int k = 0;
+    for (int i = 0; i < negyzetek.size(); ++i)
+    {
+        if (negyzetek[i].letezik == false) ++k;
+        if (abs(negyzetek[i].x - laszti.x) < 31 && abs(negyzetek[i].y - laszti.y) < 31 && negyzetek[i].letezik == true)
+        {
+            if (abs(negyzetek[i].y - laszti.y) < abs(negyzetek[i].x - laszti.x))
+            {
+                laszti.deg = (180 - laszti.deg);
+            } else {
+                laszti.deg = (360 - laszti.deg);
+            }
+
+            negyzetek[i].letezik = false;
+
+            torol(negyzetek[i].x, negyzetek[i].y, negyzetek[i].x +30,negyzetek[i].y +30);
+            i = negyzetek.size();
+        }
+    }
+
+    if (k == negyzetek.size() - 1)
+    {
+        start = false;
+        torol(1,1,XX-1,YY-1);
+        laszti.deg = rand()%180;
+        inditas();
+        gout << move_to(XX/2 - 100, YY/2 - 100) << color(255,255,255) << text("Nyertél!:)");
+        laszti.x = XX /2;
+        laszti.y = YY / 2;
+    }
+    laszti.x = (laszti.x + 10 * cos(-laszti.deg * 3.14 / 180));
+    laszti.y = (laszti.y + 10 * sin(-laszti.deg * 3.14 / 180));
+}
+
+void labdarajzol(labda& laszti, vector<negyzet>& negyzetek)
+{
+    szog(laszti, negyzetek);
+    gout << color(255,255,255);
+    for (int i = laszti.x; i < laszti.x + 30; ++i)
+    {
+        for (int j = laszti.y; j < laszti.y + 30; ++j)
+        {
+            if (round(pow(i-laszti.x-15, 2) + pow(j-laszti.y-15, 2)) < 200)
+            {
+                gout << move_to(i, j) << box(8,8);
+            }
+        }
+    }
+}
+
+
+int main()
+{
+    gout.open(XX,YY);
+    gout << font("LiberationSans-Regular.ttf",30);
+    /////////////////////////////////////
+    labda laszti;
+    laszti.x = 400;
+    laszti.y = 300;
+    laszti.deg = rand()%180;
+    inditas();
+
+
+    event ev;
+    gin.timer(35);
+
+
+    while(gin >> ev && ev.keycode != key_escape)
+    {
+        if (ev.type == ev_key && ev.keycode == key_space)
+        {
+            torol(1,1,XX- 1,YY - 1);
+            negyzetrajzol(negyzetek);
+            start = true;
+        }
+
+        if ((ev.type == ev_key && ev.keycode == key_right) && start == true)
+        {
+            uto(utox, true, true);
+            gout << refresh;
+        }
+        if ((ev.type == ev_key && ev.keycode == key_left) && start == true)
+        {
+            uto(utox, false, true);
+
+            gout << refresh;
+        }
+
+
+
+        if (ev.type == ev_timer && start == true)
+        {
+            lasztitorol(laszti);
+
+            labdarajzol(laszti, negyzetek);
+            gout << refresh;
+        }
+
+
+
+
+    }
+    return 0;
+}
+
